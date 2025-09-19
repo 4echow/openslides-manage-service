@@ -10,6 +10,7 @@ import (
 	"github.com/OpenSlides/openslides-manage-service/pkg/connection"
 	"github.com/OpenSlides/openslides-manage-service/proto"
 	"github.com/ghodss/yaml"
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/status"
@@ -109,6 +110,8 @@ func progressCmd() *cobra.Command {
 func setupMigrationCmd(cmd *cobra.Command, withInterval bool) *cobra.Command {
 	cp := connection.Unary(cmd)
 
+	log.Warn().Dur("*cp.Timeout", *cp.Timeout).Msg("migrations.setupMigrationCmd - *cp.Timeout")
+
 	var interval *time.Duration
 	if withInterval {
 		intervalHelpText := "interval of progress calls on running migrations, " +
@@ -145,6 +148,7 @@ type gRPCClient interface {
 
 // Run calls respective procedure to run migrations command via given gRPC client.
 func Run(ctx context.Context, gc gRPCClient, command string, intervalFlag *time.Duration, timeoutFlag *time.Duration) error {
+	log.Warn().Dur("parsed_timeout_flag", *timeoutFlag).Msg("migrations.Run - parsed timeoutFlag")
 	mR, err := runMigrationsCmd(ctx, gc, command, *timeoutFlag)
 	if err != nil {
 		return fmt.Errorf("running migrations command: %w", err)
@@ -268,6 +272,7 @@ func (mR MigrationResponse) OutputSince(lines int) (string, int) {
 }
 
 func runMigrationsCmd(ctx context.Context, gc gRPCClient, command string, timeout time.Duration) (MigrationResponse, error) {
+	log.Warn().Dur("timeout", timeout).Msg("migrations.runMigrationsCmd - timeout for migrCtx")
 	migrCtx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 

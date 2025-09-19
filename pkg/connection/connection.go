@@ -11,6 +11,7 @@ import (
 	"github.com/OpenSlides/openslides-manage-service/pkg/setup"
 	"github.com/OpenSlides/openslides-manage-service/pkg/shared"
 	"github.com/OpenSlides/openslides-manage-service/proto"
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -71,6 +72,11 @@ func Unary(cmd *cobra.Command) Params {
 	passwordFile := cmd.Flags().String("password-file", defaultPasswordFile, "file with password for authorization to manage service, not usable in development mode")
 	noSSL := cmd.Flags().Bool("no-ssl", false, "use an unencrypted connection to manage service")
 	timeout := cmd.Flags().DurationP("timeout", "t", defaultTimeout, "time to wait for the command's response")
+
+	log.Warn().Dur("defaultTimeout", defaultTimeout).Msg("connection.Unary - defaultTimeout")
+	log.Warn().Dur("parsed_timeout_flag", *timeout).Msg("connection.Unary - parsed timeout flag")
+	log.Warn().Bool("flag_was_changed", cmd.Flags().Changed("timeout")).Msg("connection.Unary - flag changed")
+
 	return Params{
 		Addr:         addr,
 		PasswordFile: passwordFile,
